@@ -26,23 +26,64 @@ export default class Login extends Component{
     //     console.log("123",formData.username);
 
     // }
-    onClick = (values) => {
+    onReset = (e) => {
+        e.preventDefault();
+        this.formRef.current.resetFields();
+    };
+    onCheck = async () => {
+        try {
+          const values = await this.formRef.current.validateFields();
+          console.log('Success:', values);
+        } catch (errorInfo) {
+          console.log('Failed:', errorInfo);
+        }
+      };
+    onFinish = () => {
+        
         console.log("form:",this.formRef.current);
         console.log("formData:",this.formRef.current.getFieldValue());
+        this.formRef.current.validateFields()
+            .then(values => {
+                console.log("values",values);
+                /*
+            values:
+                {
+                username: 'username',
+                password: 'password',
+                }
+            */
+            })
+            .catch(errorInfo => {
+                console.log("errorinfo",errorInfo);
+               
+                /*
+                errorInfo:
+                {
+                    values: {
+                    username: 'username',
+                    password: 'password',
+                    },
+                    errorFields: [
+                    { password: ['username'], errors: ['Please input your Password!'] },
+                    ],
+                    outOfDate: false,
+                }
+                */
+            });
       };
       /* */
     validatorPassWord=(rule, value,callback)=>{
         console.log("1212",rule,value);
         if(!value){
-            Promise.reject('密码必须输入！')
+            Promise.reject(callback('密码必须输入！'))
         }else if(value.length<4){
-            Promise.reject('密码必须大于4位！')
+            Promise.reject(callback('密码必须大于4位！'))
         }else if(value.length>12){
-            Promise.reject('密码必须小于12位！')
+            Promise.reject(callback('密码必须小于12位！'))
         }else if(!/^[a-zA-Z0-9_]+$/.test(value)){
-            Promise.reject('用户名需要由数组下划线字母组成！')
+            Promise.reject(callback('用户名需要由数组下划线字母组成！'))
         }else{
-            Promise.resolve()
+            Promise.resolve(callback())
         }
         
 
@@ -62,7 +103,7 @@ export default class Login extends Component{
                     className="login-form"
                     ref={this.formRef}
                     initialValues={{ remember: true }}
-                    // onFinish={this.onFinish}
+                    onFinish={this.onCheck}
                     >
                     
                     <Form.Item
@@ -86,7 +127,7 @@ export default class Login extends Component{
                         />
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.onClick}>
+                        <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.onReset.bind(this)}>
                         登录
                         </Button>
                     </Form.Item>
