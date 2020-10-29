@@ -1,9 +1,9 @@
-import React,{Component} from 'react'
+import React,{Component,useEffect} from 'react'
 import './login.less'
-import logo from './images/logo.png'
-import { Form, Input, Button } from 'antd';
+import logo from '../../assets/images/logo.png'
+import { Form, Input, Button, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-
+import {reqLogin} from '../../api'
 /*
 登录的路由组件
 */
@@ -18,7 +18,7 @@ export default class Login extends Component{
     constructor(props) {
         super(props);
         this.formRef = React.createRef();
-        }
+    }
     // handleSubmit = (value) =>{
     //     console.log("formData:",this.formRef.current.getFieldValue());
     //     // 获取form的值
@@ -26,70 +26,55 @@ export default class Login extends Component{
     //     console.log("123",formData.username);
 
     // }
-    onReset = (e) => {
-        e.preventDefault();
-        this.formRef.current.resetFields();
-    };
-    onCheck = async () => {
-        try {
-          const values = await this.formRef.current.validateFields();
-          console.log('Success:', values);
-        } catch (errorInfo) {
-          console.log('Failed:', errorInfo);
-        }
-      };
-    onFinish = () => {
+   
+    onClick = async() => { 
+        const {username,password}=this.formRef.current.getFieldValue();
+        console.log(username,password)
+        this.props.history.replace('/')
         
-        console.log("form:",this.formRef.current);
-        console.log("formData:",this.formRef.current.getFieldValue());
-        this.formRef.current.validateFields()
-            .then(values => {
-                console.log("values",values);
-                /*
-            values:
-                {
-                username: 'username',
-                password: 'password',
-                }
-            */
-            })
-            .catch(errorInfo => {
-                console.log("errorinfo",errorInfo);
-               
-                /*
-                errorInfo:
-                {
-                    values: {
-                    username: 'username',
-                    password: 'password',
-                    },
-                    errorFields: [
-                    { password: ['username'], errors: ['Please input your Password!'] },
-                    ],
-                    outOfDate: false,
-                }
-                */
-            });
-      };
-      /* */
-    validatorPassWord=(rule, value,callback)=>{
-        console.log("1212",rule,value);
-        if(!value){
-            Promise.reject(callback('密码必须输入！'))
-        }else if(value.length<4){
-            Promise.reject(callback('密码必须大于4位！'))
-        }else if(value.length>12){
-            Promise.reject(callback('密码必须小于12位！'))
-        }else if(!/^[a-zA-Z0-9_]+$/.test(value)){
-            Promise.reject(callback('用户名需要由数组下划线字母组成！'))
-        }else{
-            Promise.resolve(callback())
-        }
-        
+        // try {
+        //     const response=await reqLogin(username,password);
+        //     const result=response.data
+        //     if(result.status===0){
+        //         message.success('登录成功')
+        //         this.props.history.replace('/')
 
+        //         // this.props.history.push()
+        //     }else{
+        //         message.error('登录失败')
+        //     }
+        //     console.log('成功')
+        // // } catch (error) {
+        //     console.log('失败')
+        // }
+        
+        // reqLogin(this.formRef.current.getFieldValue().username,this.formRef.current.getFieldValue().password).then(response=>{
+        //     console.log('成功了',response.data);
+        // }).catch(error=>{
+        //     console.log('失败了',error);
+        // })
+        console.log("form:",this.formRef.current);
+        console.log("formData:",this.formRef.current.getFieldValue().username);
     }
-    render(){
+                
+    validator=(rule, value) => {
+          console.log("1212",rule,value);
+          if(!value){
+              Promise.reject('密码必须输入！')
+          }else if(value.length<4){
+              Promise.reject('密码必须大于4位！')
+          }else if(value.length>12){
+              Promise.reject('密码必须小于12位！')
+          }else if(!/^[a-zA-Z0-9_]+$/.test(value)){
+              Promise.reject('用户名需要由数组下划线字母组成！')
+          }else{
+              Promise.resolve()
+          }
        
+      }
+    
+    render(){
+        
         return(
             <div className="login">
                 <header className="login-header">
@@ -103,7 +88,7 @@ export default class Login extends Component{
                     className="login-form"
                     ref={this.formRef}
                     initialValues={{ remember: true }}
-                    onFinish={this.onCheck}
+                    // onFinish={this.onCheck}
                     >
                     
                     <Form.Item
@@ -112,13 +97,13 @@ export default class Login extends Component{
                                 { min: 4, message: '用户名至少4位!' },
                                 {max:12,message:"用户名最多12位！"},
                                 {pattern:/^[a-zA-Z0-9_]+$/,message:"用户名需要由数组下划线字母组成！"}
-                            ]}
+                            ]} 
                     >
                         <Input prefix={<UserOutlined className="site-form-item-icon" style={{color:'rgba(0,0,0,.5)'}}/>} placeholder="Username" />
                     </Form.Item>
                     <Form.Item
                         name="password"
-                        rules={[{ validator:this.validatorPassWord}]}
+                        rules={[{ validator:this.validator}]}
                     >
                         <Input
                         prefix={<LockOutlined className="site-form-item-icon" style={{color:'rgba(0,0,0,.5)'}}/>}
@@ -127,7 +112,7 @@ export default class Login extends Component{
                         />
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.onReset.bind(this)}>
+                        <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.onClick}>
                         登录
                         </Button>
                     </Form.Item>
